@@ -9,9 +9,13 @@ export const App = () => {
 
   return (
     <div>
-      {status === 'loading' && <LinearLoader/>}
+      {status === 'loading' && <LinearLoader />}
       <Decks />
       <GlobalError />
+      <footer>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Corporis eius eligendi fuga in iste neque
+        perspiciatis quasi voluptates? Assumenda blanditiis consectetur culpa dolorum esse et eveniet expedita impedit
+        ipsam nihil optio provident quam quasi, tempora totam? Ipsa natus perspiciatis velit.
+      </footer>
     </div>
   )
 }
