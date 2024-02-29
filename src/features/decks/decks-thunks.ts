@@ -2,7 +2,7 @@ import { Dispatch } from 'redux'
 import { decksAPI, FetchDecksResponse, UpdateDeckParams } from './decks-api.ts'
 import { addDeckAC, deleteDeckAC, setDecksAC, updateDeckAC } from './decks-reducer.ts'
 import { setAppStatusAC } from '../../app/app-reducer.ts'
-import axios, { AxiosError } from 'axios'
+import axios, { AxiosError, isAxiosError } from 'axios'
 
 export const fetchDecksTC = () => async (dispatch: Dispatch) => {
   dispatch(setAppStatusAC('loading'))
@@ -29,32 +29,28 @@ export const deleteDeckTC = (id: string) => async (dispatch: Dispatch) => {
 // case-2: network error - axios создает объект ошибки, сообщение можно взять из поля е.message
 // case-3: синхронные ошибки - создается "нативная" JS-ошибка, имеет поле message (axios здесь не причем)
 
-type ErrorType = {
-  errorMessages: [
-    {
-      field: string,
-      message: string
-    }
-  ]
-}
-type SimpleErrorType = {
-  message: string
-}
 export const updateDeckTC = (params: UpdateDeckParams) => async (dispatch: Dispatch) => {
   try {
     // throw new Error('Boom!!!') // for test case-3
     const res = await decksAPI.updateDeck(params)
     dispatch(updateDeckAC(res.data))
   } catch (e) {
-    let errorMessage: string = ''
-    if (axios.isAxiosError<ErrorType>(e) && e.response) {
-      errorMessage = e.response.data.errorMessages[0].message;
-    } else if (axios.isAxiosError<SimpleErrorType>(e)) {
-      console.log('axios')
-      errorMessage = e.message
-    } else if (e instanceof  Error) {
-      errorMessage = e.message
+    let errorMessage: string
+    if (isAxiosError<ServerError>(e)) {
+      console.log('ax')
+      errorMessage = e.response ? e.response.data.errorMessages[0].message : e.message
+    } else {
+      errorMessage = (e as Error).message
     }
     console.log(errorMessage)
   }
+}
+
+type ServerError = {
+  errorMessages: [
+    {
+      field: string,
+      message: string
+    }
+  ]
 }
